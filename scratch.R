@@ -37,5 +37,57 @@ summary_data <- summarize_events(cleaned)
 ##### do local work below here
 ###########################################
 
+library(stringr)
 
+extract_ids_preedit <- function(url) {
+  start_index <- str_locate(url, "data=")[,2]
+  ids <- list()
+  match_length <- attr(regexpr("data=", url), "match.length")
+  
+  while (start_index > -1) {
+    end_index <- str_locate(url, "&data=", start = start_index)[, 2]
+    if (end_index == -1) {
+      ids <- c(ids, list(str_sub(url, start_index)))
+      break
+    }
+    ids <- c(ids, list(str_sub(url, start_index, end_index - 1)))
+    start_index <- end_index + match_length
+  }
+  
+  return(ids)
+}
+
+
+# the function below extracts the exact id from the url within doenet
+library(stringr)
+
+extract_ids <- function(url) {
+  start_index <- regexpr("data=", url)[1] + 5
+  ids <- list()
+  match_length <- attr(regexpr("data=", url), "match.length")
+  
+  while (start_index > 0) {
+    end_index <- regexpr("&data=", url, start_index)[1]
+    if (end_index == -1) {
+      ids <- c(ids, list(substr(url, 
+                                start_index)))
+      break
+    }
+    ids <- c(ids, list(substr(url, start_index, end_index - 1)))
+    start_index <- end_index + match_length
+  }
+  
+  return(ids)
+}
+
+
+
+# Example usage
+url <- "https://doenet.shinyapps.io/analyzer/?data=_Y8rhJ0x5KzbEF4cc73RFH&data=_szGjThMMAaq0gmXaig9nq&code=4k6dSxGZ0BSztlexusbmU"
+ids <- extract_ids(url)
+
+# Print each ID separately
+for (id in ids) {
+  print(id)
+}
 
